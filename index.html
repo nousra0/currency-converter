@@ -1,0 +1,212 @@
+<html lang="en">
+
+<head>
+     <meta charset="UTF-8">
+     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+     <title>Currency Converter</title>
+</head>
+
+<body>
+     <div class="currencyContent">
+          <h1 class="text-center pt-5 text-white">Currency Converter</h1>
+
+          <div class="selectDiv">
+               <select id="from" class="form-control w-25"></select>
+               <select id="to" class="form-control w-25"></select>
+          </div>
+          <input type="number" id="amount" class="form-control w-25 input" placeholder="Write amount" />
+          <br>
+          <button type="button" id="convert" class="btn text-white px-5">Convert</button>
+          <div class="divResult">
+               <span id="cur1" class="text-white m-3"></span>
+               <span id="cur2" class="text-white m-3"></span>
+          </div>
+     </div>
+
+</body>
+
+</html>
+
+<style>
+     #cur1 {
+          border-radius: 10px;
+          box-shadow: 0px 0px 5px 5px lightslategrey;
+          width: 200px !important;
+          text-align: center;
+          animation-name: getDiv1;
+          animation-duration: 0.5s;
+          display: none;
+     }
+
+     #cur2 {
+          border-radius: 10px;
+          box-shadow: 0px 0px 5px 5px lightslategrey;
+          width: 200px !important;
+          text-align: center;
+          animation-name: getDiv2;
+          animation-duration: 0.5s;
+          display: none;
+     }
+
+     @keyframes getDiv1 {
+          from {
+               transform: scale(0);
+          }
+
+          to {
+               transform: scale(1);
+          }
+     }
+
+     @keyframes getDiv2 {
+          from {
+               transform: scale(0);
+          }
+
+          to {
+               transform: scale(1);
+          }
+     }
+
+     .currencyContent {
+          height: 100%;
+          background-image: linear-gradient(to bottom, #5a4a27, #1d124a);
+     }
+
+     .currencyContent h1 {
+          text-shadow: 0px 0px 5px;
+     }
+
+     #from,
+     #to {
+          display: inline;
+          box-shadow: 0px 0px 3px white;
+     }
+
+     .selectDiv {
+          width: 50%;
+          text-align: center;
+          display: block;
+          margin: auto;
+          margin-top: 100px;
+     }
+
+     .input {
+          margin: auto;
+          margin-top: 50px;
+          box-shadow: 0px 0px 3px white;
+     }
+
+     .btn {
+          margin: auto;
+          display: block;
+          box-shadow: 0px 0px 3px;
+          transition: 0.5s;
+          margin-top: 30px;
+     }
+
+     .btn:hover {
+          box-shadow: 0px 0px 10px;
+     }
+
+     .divResult {
+          display: block;
+          margin: auto;
+          width: fit-content;
+          height: 50px;
+          margin-top: 100px;
+     }
+
+     /* Chrome, Safari, Edge, Opera */
+     #amount::-webkit-outer-spin-button,
+     #amount::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+     }
+
+</style>
+
+<script>
+     const convert = document.getElementById("convert");
+     const result = document.getElementById("result");
+     const from = document.getElementById("from");
+     const to = document.getElementById("to");
+     const amount = document.getElementsByTagName("input")[0];
+     const cur1 = document.getElementById("cur1");
+     const cur2 = document.getElementById("cur2");
+
+     let rates
+
+     let fromCurrency = from.value;
+     let toCurrency = to.value;
+
+     // Get value from amount input and make two way binding with input1
+     const textInput = {
+          value: ''
+     };
+
+     Object.defineProperty(textInput, 'prop', {
+          get: function () {
+               return this.value;
+          },
+          set: function (value) {
+               this.value = value;
+               printVal();
+          }
+     });
+
+     amount.addEventListener('keyup', (value) => {
+          textInput.prop = event.target.value;
+     })
+     function printVal() {
+          if (textInput.prop && textInput.prop > 0) {
+               cur1.style.display = 'inline-block'
+               cur1.innerHTML = textInput.prop;
+
+          } else {
+               cur1.style.display = 'none'
+          }
+     }
+
+     // Get currency data
+
+     fetch('https://api.exchangerate.host/latest')
+          .then(response => {
+               return response.json();
+          })
+          .then(data => {
+               rateKeys = Object.keys(data.rates)
+               for (const ratesItems of rateKeys) {
+                    let option = document.createElement("option");
+                    option.textContent = ratesItems
+                    option.value = data.rates[ratesItems]
+
+                    from.appendChild(option)
+               }
+               for (const ratesItems of rateKeys) {
+                    let option = document.createElement("option");
+                    option.textContent = ratesItems
+                    option.value = data.rates[ratesItems]
+
+                    to.appendChild(option)
+               }
+          });
+
+     // Take action
+     convert.addEventListener("click", function () {
+          let text1 = from.options[from.selectedIndex].text;
+          let value1 = from.options[from.selectedIndex].value;
+          let text2 = to.options[to.selectedIndex].text;
+          let value2 = to.options[to.selectedIndex].value;
+          let amt = amount.value
+          if (amt && amt > 0) {
+               let total = cur1.textContent * value2 / value1
+               cur2.style.display = 'inline-block'
+               cur2.textContent = total
+          }
+     });
+</script>
